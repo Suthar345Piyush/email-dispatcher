@@ -8,13 +8,16 @@ import (
 	"os"
 )
 
-func loadRecipient(filePath string) error {
+func loadRecipient(filePath string, ch chan Recipient) error {
+	defer close(ch)
 
 	f, err := os.Open(filePath)
 
 	if err != nil {
 		return err
 	}
+
+	defer f.Close()
 
 	// creating a reader to read the csv data
 
@@ -27,6 +30,13 @@ func loadRecipient(filePath string) error {
 
 	for _, record := range records[1:] {
 		fmt.Println(record)
+
+		// sending data into channel
+		ch <- Recipient{
+			Name:  record[0],
+			Email: record[1],
+		}
+
 		// send -> consumer -> unbuffered channel
 	}
 
